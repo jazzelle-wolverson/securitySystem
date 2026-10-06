@@ -8,18 +8,19 @@ app = Flask(__name__)
 def index():
     return 'index'
 
-@app.route('/info', methods = ["GET", "POST"])
+@app.route('/info', methods = ["GET"])
 def info():
-    info = request.args.get("/info", "(not provided)")
+    getData = request.args.get("val")
     # data2 = request.json
     # usingData = data2["val"]
-    print(info)
+    # print(getData)
 
-    return info
-
-@app.route('/hello/<name>')
-def hello(name="test"):
-    return render_template('/hello/', person=name)
+    # return getData
+    return render_template(
+        'info.html',
+        title="Info",
+        arduinoData = getData
+        )
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
