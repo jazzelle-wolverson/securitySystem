@@ -4,10 +4,10 @@
 char ssid[] = "BPstudent";
 char password[] = "studentuse";
 int status = WL_IDLE_STATUS;
-char serverAddress[] = "http://10.30.1.3:5000";
+char serverAddress[] = "172.17.20.210";
 
 WiFiClient client;
-HttpClient httpClient = HttpClient(client, serverAddress, 80);
+HttpClient httpClient = HttpClient(client, serverAddress, 5000);
 
 int sensor = 1; // the pin that the sensor is atteched to
 int state = HIGH; // by default, no motion detected
@@ -17,30 +17,8 @@ int redLED = 3;
 int greenLED = 5;
 int blueLED = 6;
 
-// WiFi.begin(ssid, password);
-//   while (WiFi.status() != WL_CONNECTED) {
-//     delay(500);
-//     Serial.print(".");
-//  }
-
 void setup() {
   Serial.begin(9600); // initialize serial
-  while (WiFi.begin(ssid, password) != WL_CONNECTED) {
-    Serial.println("Couldn't get a wifi connection");
-    // don't do anything else:
-    while(true);
-  }
-
-  //   Serial.println("Connected to wifi");
-  //   Serial.println("\nStarting connection...");
-  //   // if you get a connection, report back via serial:
-  //   if (client.connect(serverAddress, 80)) {
-  //     Serial.println("connected");
-  //     // Make a HTTP request:
-  //     client.println("GET /search?q=arduino HTTP/1.0");
-  //     client.println();
-  // }
-
 
   pinMode(sensor, INPUT); // initialize sensor as an input
   pinMode(reed, INPUT_PULLUP);
@@ -48,49 +26,60 @@ void setup() {
   pinMode(greenLED, OUTPUT);
   pinMode(blueLED, OUTPUT);
 
-  // int httpCode = httpClient.responseStatusCode();
-  // Serial.print("HTTP response code: ");
-  // Serial.println(httpCode);
+  while (WiFi.begin(ssid, password) != WL_CONNECTED) {
+    Serial.println("Couldn't get a wifi connection");
+    delay(1000);
+  }
 
-  // if (httpCode > 0) {
-  //   String responseBody = httpClient.responseBody();
-  //   Serial.println("Response body:");
-  //   Serial.println(responseBody);
-  // }
+    Serial.println("WiFi connected!");
+    Serial.print("Arduino IP: ");
+    Serial.println(WiFi.localIP());
+  // if (client.connect(serverAddress, 5000)) {
+  //   Serial.println("connected");
+  //   // Make a HTTP request:
+  //   // httpClient.get("/info?getData=testing");
+  // }   
 }
 
 void loop(){
-  if (client.connect(serverAddress, 5000)) {
-    Serial.println("connected");
-    // Make a HTTP request:
-    httpClient.get("/info?getData=test");
-  }
-
-  val = digitalRead(sensor); // read sensor value
-  if (val == HIGH) { // check if the sensor is HIGH
+   val = digitalRead(sensor); // read sensor value
+  if (val == HIGH && state == LOW) { // check if the sensor is HIGH
     // setColor(255, 255, 255);
     // delay(100); // delay 100 milliseconds
-    while (state == LOW) {
+    // while (state == LOW) {
       setColor(0, 0, 255);
       Serial.println("Motion detected!");
+      httpClient.get("/info?getData=Motion%20Detected");
+      int statusCode = httpClient.responseStatusCode();
+      Serial.print("HTTP status: ");
+      Serial.println(statusCode);
+      httpClient.stop();
       state = HIGH; // update variable state to HIGH
       delay(1500);
-    }
+    // }
   }
-  else {
+  else if (val == LOW && state == HIGH) {
     delay(200); // delay 200 milliseconds
-    while (state == HIGH){
-     setColor(255, 255, 255);
-     Serial.println("Motion stopped!");
+    // while (state == HIGH){
+      setColor(255, 255, 255);
+      Serial.println("Motion stopped!");
+      httpClient.get("/info?getData=No%20Motion%20Detected");
+      int statusCode = httpClient.responseStatusCode();
+      Serial.print("HTTP status: ");
+      Serial.println(statusCode);
+      httpClient.stop();
+
       state = LOW; // update variable state to LOW
-    }
+    // }
   }
   if (digitalRead(reed) == LOW) {
     setColor(255, 255, 255);
     Serial.println("door closed");
+    // httpClient.get("/info?getData=Door%20Closed");
   } else {
     setColor(255, 0, 0);
     Serial.println("door open");
+    // httpClient.get("/info?getData=Door%20Open");
     delay(500);
   }
 }
