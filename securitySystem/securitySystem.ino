@@ -30,57 +30,56 @@ void setup() {
     Serial.println("Couldn't get a wifi connection");
     delay(1000);
   }
-
     Serial.println("WiFi connected!");
     Serial.print("Arduino IP: ");
     Serial.println(WiFi.localIP());
-  // if (client.connect(serverAddress, 5000)) {
-  //   Serial.println("connected");
-  //   // Make a HTTP request:
-  //   // httpClient.get("/info?getData=testing");
-  // }   
 }
 
 void loop(){
-   val = digitalRead(sensor); // read sensor value
+  val = digitalRead(sensor); // read sensor value
   if (val == HIGH && state == LOW) { // check if the sensor is HIGH
-    // setColor(255, 255, 255);
-    // delay(100); // delay 100 milliseconds
-    // while (state == LOW) {
-      setColor(0, 0, 255);
-      Serial.println("Motion detected!");
-      httpClient.get("/info?getData=Motion%20Detected");
-      int statusCode = httpClient.responseStatusCode();
-      Serial.print("HTTP status: ");
-      Serial.println(statusCode);
-      httpClient.stop();
-      state = HIGH; // update variable state to HIGH
-      delay(1500);
-    // }
-  }
-  else if (val == LOW && state == HIGH) {
-    delay(200); // delay 200 milliseconds
-    // while (state == HIGH){
-      setColor(255, 255, 255);
-      Serial.println("Motion stopped!");
-      httpClient.get("/info?getData=No%20Motion%20Detected");
-      int statusCode = httpClient.responseStatusCode();
-      Serial.print("HTTP status: ");
-      Serial.println(statusCode);
+    setColor(0, 0, 255);
+    Serial.println("Motion detected!");
+    delay(1500);
       httpClient.stop();
 
-      state = LOW; // update variable state to LOW
-    // }
+    if (digitalRead(reed) == LOW) {
+      setColor(255, 255, 255);
+      Serial.println("door closed");
+      httpClient.get("/info?getData=Door%20Closedandmotiondetected");
+      // int statusCode = httpClient.responseStatusCode();
+      // Serial.print("HTTP status: ");
+      // Serial.println(statusCode);    
+      httpClient.stop();
+    } else {
+      setColor(255, 0, 0);
+      Serial.println("door open");
+      httpClient.get("/info?getData=Door%20Openandmotiondetected");
+      httpClient.stop();
+    }
+    state = HIGH; // update variable state to HIGH
   }
-  if (digitalRead(reed) == LOW) {
+
+  else if (val == LOW && state == HIGH) {
+    delay(200); // delay 200 milliseconds
     setColor(255, 255, 255);
-    Serial.println("door closed");
-    // httpClient.get("/info?getData=Door%20Closed");
-  } else {
-    setColor(255, 0, 0);
-    Serial.println("door open");
-    // httpClient.get("/info?getData=Door%20Open");
-    delay(500);
+       httpClient.stop();
+   Serial.println("Motion stopped!");
+    if (digitalRead(reed) == LOW) {
+      setColor(255, 255, 255);
+      Serial.println("door closed");
+      // httpClient.get("/info?getData=Door%20ClosedandmotionNOTdetected");
+      // int statusCode = httpClient.responseStatusCode();
+      // Serial.print("HTTP status: ");
+      // Serial.println(statusCode);
+      httpClient.stop();
+    } else {
+      setColor(255, 0, 0);
+      Serial.println("door open");
+      // httpClient.get("/info?getData=Door%20OpenandmotionNOTdetected");
+      httpClient.stop();
+    }
+    state = LOW; // update variable state to LOW    
   }
 }
 

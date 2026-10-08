@@ -3,12 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="static/main.css">
     <title>{{ title }}</title>
 </head>
 <body>
+    <nav>
+        <a href='/'>Index</a></li>
+        <a href=info>Info</a></li>
+        <a href=dashboard>Dashboard</a></li>
+    </nav>    
     <p>test title: {{ title }}</p>
-    <p>this is my info page!!!!</p>
-    <p>arduino data!!!!! -> {{ arduinoData }}</p>
+    <p>this is my info page!!!! {{ timestamp }}</p>
+    <p>arduino data!!!!! -> {{ getData }}</p>
+    <p>motion {{ motion }}</p>
+    <script>
+        // const container = document.createElement("div");
+        const container = document.getElementById("container");
+        const genericButton = document.createElement("button");
+        // A sample mock function simulating a network request
+        async function checkStatus() {
+        const response = await fetch('http://172.17.20.210:5000/info');
+        console.log(response);
+        const data = await response.json();
+        console.log(data);
+
+        data.LISTILLCREATETOMORROW.forEach(element => {
+            console.log("testing");
+            });
+        }
+        return data;
+
+        // The polling loop function
+        async function startPolling() {
+        const POLL_INTERVAL = 5000; // 5 seconds
+
+        try {
+            console.log("test to see TRY");
+            const data = await checkStatus();
+            console.log('Poll data received:', data);
+
+            // Stop polling if the desired state is reached
+            if (data.status === 'completed') {
+            console.log('Polling complete. Task finished!');
+            return; 
+            }
+
+            container.textContent = response;
+
+            // Schedule the next poll ONLY after this round completes successfully
+            setTimeout(startPolling, POLL_INTERVAL);
+
+        } catch (error) {
+            console.log("test to see CATCH");
+            console.error('Polling encountered an error:', error);
+            
+            // Optional: Schedule a retry even if it fails, or stop entirely
+            // setTimeout(startPolling, POLL_INTERVAL);
+            }
+        }
+
+        // Start the loop
+        startPolling();
+
+    </script>
 </body>
 </html>
