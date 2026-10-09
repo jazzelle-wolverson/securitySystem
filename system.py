@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import sqlite3
 from datetime import datetime
 
@@ -16,8 +16,15 @@ def dashboard():
         'dashboard.html'
     )
 
+@app.route('/api/info')
+def api_info():
+    test = []
+    testAdd = "hey"
+    return jsonify(test=test, testAdd=testAdd)
+
 @app.route('/info', methods = ["GET", "POST"])
 def info():
+    myArray = ["test", "testing"]
     connection = sqlite3.connect("arduinoData.db", check_same_thread=False)
     cursor = connection.cursor()    
     getData = request.args.get("getData", "(not provided)")
@@ -29,6 +36,8 @@ def info():
 
     print("motion: ", getData)
     print("timestamp: ", timestamp)
+
+
 
     cursor.execute(
         "INSERT INTO motion_detection (motion, timestamp) VALUES (?, ?)",
@@ -43,7 +52,8 @@ def info():
         title="Info",
         getData = getData,
         timestamp=timestamp,
-        motion = motion
+        motion = motion,
+        myArray = myArray
         )
 
 if __name__ == '__main__':
